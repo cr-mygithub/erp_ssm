@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.RoleMapper">
+    <!--    Role findAll();  -->
+    <resultMap id="roleMap" type="com.erp.pojo.Role">
+        <id property="roleId" column="id"/>
+        <result property="roleName" column="name"/>
+    </resultMap>
+    <select id="findPermissionIdsByRoleId" resultType="int">
+       SELECT permission_id from role_permission where role_id=#{roleId}
+    </select>
+    <select id="findAll" resultMap="roleMap" >
+        select * from role
+    </select>
+    <select id="page" resultMap="roleMap">
+        select * from `role`
+        <where>
+        <if test="role.roleName!=null and role.roleName!=''">
+            and name like '%${role.roleName}%'
+        </if>
+        </where>
+      limit #{start},#{pageSize}
+    </select>
+    <select id="count" resultType="int">
+        select count(*) from `role`
+        <where>
+            <if test="role.roleName!=null and role.roleName!=''">
+                and name like '%${role.roleName}%'
+            </if>
+        </where>
+
+    </select>
+    <insert id="add">
+        insert into role(id,name) values(null,#{role.roleName})
+    </insert>
+    <update id="update">
+        update role set id=#{role.roelId},name=#{role.roleName}
+    </update>
+    <delete id="remove">
+        delete from role where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+         #{id}
+         </foreach>
+    </delete>
+</mapper>

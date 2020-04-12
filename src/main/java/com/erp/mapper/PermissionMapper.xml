@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.PermissionMapper">
+    <resultMap id="treeMap" type="com.erp.util.TreeResultUtil">
+        <id property="id" column="id"/>
+        <result property="text" column="p_name"/>
+        <result property="iconCls" column="p_img_url"/>
+        <result property="url" column="p_url"/>
+        <collection property="children" ofType="com.erp.util.TreeResultUtil">
+            <id property="id" column="c_id"/>
+            <result property="text" column="c_name"/>
+            <result property="iconCls" column="c_img_url"/>
+            <result property="url" column="c_url"/>
+        </collection>
+    </resultMap>
+    <select id="list" resultMap="treeMap">
+        SELECT pp.id id,pp.name p_name,pp.img_url p_img_url,
+        pc.id c_id,pc.name c_name,pc.img_url c_img_url from
+        permission pp,permission pc where pp.id=pc.pid;
+    </select>
+    <delete id="deleteByRoleId">
+        delete from role_permission where role_id=#{roleId}
+    </delete>
+    <insert id="addPerm">
+        insert into role_permission(role_id,permission_id) values
+        <foreach collection="permIds" item="permId" separator=",">
+            (#{roleId},#{permId})
+        </foreach>
+    </insert>
+<!--      List<TreeResultUtil> getPerms(String userName);-->
+    <select id="getPerms" resultMap="treeMap">
+        SELECT emp.username,pp.id id,pp.name p_name,pp.img_url p_img_url,
+				pp.url p_url,
+        pc.id c_id,pc.name c_name,pc.img_url c_img_url, pc.url c_url from
+        permission pp,permission pc,role_permission rp,emp_role er,emp
+				where pp.id=pc.pid and pc.id =rp.permission_id and er.role_id =rp.role_id and er.emp_id=emp.id
+				and username=#{userName} GROUP BY pc.id
+    </select>
+</mapper>
